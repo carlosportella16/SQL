@@ -1,0 +1,113 @@
+create schema streaming;
+
+-- Criando tabela Gênero
+create table streaming.genero (
+	id int PRIMARY KEY,
+	nome text
+);
+
+-- Inserindo dados tabela Gênero
+insert into streaming.genero values (1, 'ação');
+insert into streaming.genero values (2, 'comédia');
+insert into streaming.genero values (3, 'aventura');
+insert into streaming.genero values (4, 'terror');
+insert into streaming.genero values (5, 'drama');
+insert into streaming.genero values (6, 'romance');
+insert into streaming.genero values (7, 'documentario');
+insert into streaming.genero values (8, 'ficção');
+insert into streaming.genero values (9, 'musical');
+
+-- Criando tabela Atores
+create table streaming.atores (
+	id int PRIMARY KEY,
+	nome text,
+	nascimento int
+);
+
+-- Inserindo dados tabela Atores
+insert into streaming.atores values (1, 'Will Smith', 1968); 
+insert into streaming.atores values (2, 'Tommy Lee Jones', 1946); 
+insert into streaming.atores values (3, 'Vicent D Onofrio', 1959); 
+insert into streaming.atores values (4, 'Martin Lawrence', 1965); 
+insert into streaming.atores values (5, 'Brad Pitt', 1963); 
+insert into streaming.atores values (6, 'Edward Harrison Norton', 1969); 
+insert into streaming.atores values (7, 'Helena Bonham Carter', 1966); 
+insert into streaming.atores values (8, 'Michael Imperioli', 1966); 
+insert into streaming.atores values (9, 'Helena Bonham Carter', 1966); 
+
+-- Deletando linha 9 tabela atores (Duplicada)
+DELETE FROM streaming.atores
+WHERE id = 9
+
+-- Criando tabela Filmes e declarando FK
+create table streaming.filmes (
+	id int PRIMARY KEY,
+	nome text,
+	ano int,
+	id_genero int,
+	constraint fk_genero FOREIGN KEY(id_genero)
+		REFERENCES streaming.genero(id)
+);
+
+-- Inserindo dados tabela Filmes
+insert into streaming.filmes values (1, 'Homens de Preto', 1997, 8);
+insert into streaming.filmes values (2, 'Bad Boys', 1995, 1);
+insert into streaming.filmes values (3, 'Clube da Luta', 1999, 1);
+
+-- Criando tabela Elenco e declarando as Fks
+create table streaming.elenco (
+	id int PRIMARY KEY,
+	id_atores int,
+	id_filmes int,
+	ator_principal boolean,
+	constraint fk_atores FOREIGN KEY(id_atores)
+		REFERENCES streaming.atores(id),
+	constraint fk_filmes FOREIGN KEY(id_filmes)
+		REFERENCES streaming.filmes(id)
+);
+
+-- Inserindo dado elenco, com boolean para ator principal
+insert into streaming.elenco values (1, 1, 1, true);
+insert into streaming.elenco values (2, 1, 2, true);
+insert into streaming.elenco values (3, 2, 1, true);
+insert into streaming.elenco values (4, 3, 1, false);
+insert into streaming.elenco values (5, 4, 2, true);
+insert into streaming.elenco values (6, 5, 3, true);
+insert into streaming.elenco values (7, 6, 3, true);
+insert into streaming.elenco values (8, 7, 3, false);
+insert into streaming.elenco values (9, 8, 2, false);
+
+-- Juntando tabela Elenco com tabela Filmes
+select *
+from streaming.elenco e
+join streaming.filmes f
+on (e.id_filmes = f.id)
+join streaming.atores a
+on (e.id_atores = a.id);
+
+-- Selecionando o nome do ator que teve mais participação em filmes (Ex4.A)
+select a.nome, count (*) 
+from streaming.elenco e
+join streaming.atores a
+on (a.id = e.id_atores)
+group by 1
+order by 2 desc limit 1;
+
+-- Juntando tabela Filmes com tabela Elenco
+select *
+from streaming.filmes f
+join streaming.elenco e
+on (e.id_filmes = f.id);
+
+-- Selecionando o filme mais antigo (Ex4.B)
+select * from streaming.filmes 
+order by ano asc limit 1;
+
+-- Selecionando a média de idade dos atores (Ex4.C)
+select avg(nascimento)::numeric(10,2) from streaming.atores;
+
+
+select * from streaming.genero;
+select * from streaming.atores;
+select * from streaming.filmes;
+select * from streaming.elenco;
